@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -22,11 +21,13 @@ import java.util.UUID;
 public class Card {
 
     @Id
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
-    private Integer number;
+    @Column(nullable = false)
+    private String number;
 
     @Column(nullable = false)
     private Integer balance;
@@ -46,12 +47,6 @@ public class Card {
 
     @UpdateTimestamp
     private Instant updated;
-
-    @OneToMany(mappedBy = "cardFrom", cascade = CascadeType.MERGE)
-    private Set<Transfer> writeDowns = new HashSet<>();
-
-    @OneToMany(mappedBy = "cardTo", cascade = CascadeType.MERGE)
-    private Set<Transfer> replenishment = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

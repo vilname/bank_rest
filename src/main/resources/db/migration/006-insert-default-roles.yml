@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-insert-default-roles
+      author: developer
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+              - column:
+                  name: name
+                  value: ROLE_USER
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+              - column:
+                  name: name
+                  value: ROLE_ADMIN
+      rollback:
+        - delete:
+            tableName: role
+            where: name IN ('ROLE_USER', 'ROLE_ADMIN')

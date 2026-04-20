@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-role-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: role
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropTable:
+            tableName: role

@@ -1,11 +1,13 @@
 package com.example.bankcards.entity;
 
+import com.example.bankcards.util.enums.RolesEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -20,6 +22,8 @@ import java.util.UUID;
 public class User {
 
     @Id
+    @GeneratedValue
+    @UuidGenerator
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
