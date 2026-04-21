@@ -1,8 +1,8 @@
 package com.example.bankcards.service.api.auth;
 
-import com.example.bankcards.dto.auth.AuthResponse;
-import com.example.bankcards.dto.auth.LoginRequest;
-import com.example.bankcards.dto.auth.RegisterRequest;
+import com.example.bankcards.dto.api.auth.AuthResponse;
+import com.example.bankcards.dto.api.auth.LoginRequest;
+import com.example.bankcards.dto.api.auth.RegisterRequest;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.security.JwtUtils;

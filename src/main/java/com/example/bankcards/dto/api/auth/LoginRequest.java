@@ -1,4 +1,4 @@
-package com.example.bankcards.dto.auth;
+package com.example.bankcards.dto.api.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,8 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
-
+public class LoginRequest {
     @NotBlank
     @Email
     private String email;
@@ -15,7 +14,4 @@ public class RegisterRequest {
     @NotBlank
     @Size(min = 6, max = 100)
     private String password;
-
-    private String firstName;
-    private String lastName;
 }

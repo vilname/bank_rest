@@ -1,12 +1,13 @@
 package com.example.bankcards.service.admin.user;
 
-import com.example.bankcards.dto.admin.AdminUserRequest;
+import com.example.bankcards.dto.admin.AdminUserResponse;
 import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.BadRequestException;
 import com.example.bankcards.exception.NotFoundException;
 import com.example.bankcards.repository.RoleRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.util.dto.PaginationRequest;
 import com.example.bankcards.util.dto.PaginationResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,29 +28,30 @@ public class AdminUserService {
         this.roleRepository = roles;
     }
 
-    public PaginationResponse<AdminUserRequest> list(Pageable pageable) {
-        List<User> users = userRepository.findAllWithPaginationAndRoles(pageable.getOffset(), pageable.getPageSize());
-        List<AdminUserRequest> userDto = users.stream().map(AdminUserService::toDto).toList();
+    public PaginationResponse<AdminUserResponse> list(PaginationRequest pagination) {
+        List<User> users = userRepository.findAllWithPaginationAndRoles(pagination.getOffset(), pagination.getLimit());
+        List<AdminUserResponse> userDto = users.stream().map(AdminUserService::toDto).toList();
 
         int total = (int)userRepository.count();
 
-        return new PaginationResponse<>(userDto, pageable, total);
+        return new PaginationResponse<>(userDto, pagination, total);
     }
 
-    public AdminUserRequest get(UUID userId) {
+    public AdminUserResponse get(UUID userId) {
         return userRepository.findById(userId).map(AdminUserService::toDto)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     @Transactional
-    public AdminUserRequest setActive(UUID userId, boolean active) {
+    public void setActive(UUID userId, boolean active) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         user.setActive(active);
-        return toDto(user);
+
+        userRepository.save(user);
     }
 
     @Transactional
-    public AdminUserRequest setRoles(UUID userId, Set<String> roleNames) {
+    public void setRoles(UUID userId, Set<String> roleNames) {
         if (roleNames == null || roleNames.isEmpty()) {
             throw new BadRequestException("Roles must not be empty");
         }
@@ -62,7 +64,8 @@ public class AdminUserService {
                 .toList();
 
         user.setRoles(newRoles);
-        return toDto(user);
+
+        userRepository.save(user);
     }
 
     @Transactional
@@ -73,9 +76,9 @@ public class AdminUserService {
         userRepository.deleteById(userId);
     }
 
-    private static AdminUserRequest toDto(User u) {
+    private static AdminUserResponse toDto(User u) {
         Set<String> roles = u.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-        return new AdminUserRequest(
+        return new AdminUserResponse(
                 u.getId(),
                 u.getEmail(),
                 u.getFirstName(),

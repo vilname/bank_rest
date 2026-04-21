@@ -17,10 +17,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
 
-    @Query(value = "SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.roles",
-            countQuery = "SELECT COUNT(u) FROM User u")
-    Page<User> findAllWithRoles(Pageable pageable);
-
     @Query(value = """
         select distinct u.* from "user" u 
         join user_role ur ON u.id = ur.user_id 

@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-public record AdminUserRequest(
+public record AdminUserResponse(
         UUID id,
         String email,
         String firstName,

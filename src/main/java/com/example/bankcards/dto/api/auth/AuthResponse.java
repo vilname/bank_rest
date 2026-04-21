@@ -1,4 +1,4 @@
-package com.example.bankcards.dto.auth;
+package com.example.bankcards.dto.api.auth;
 
 
 import lombok.AllArgsConstructor;

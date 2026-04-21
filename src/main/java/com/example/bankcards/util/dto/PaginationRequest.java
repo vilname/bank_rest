@@ -18,11 +18,11 @@ public class PaginationRequest {
 
     private int offset;
 
-    public PaginationRequest() {
-        this.offset = (this.page - 1) * this.limit;
-    }
+    public PaginationRequest(int page, int limit) {
+        page = Math.max(page, 1);
 
-    public Pageable toPageable() {
-        return PageRequest.of(page - 1, limit);
+        this.offset = (page - 1) * limit;
+        this.page = page;
+        this.limit = limit;
     }
 }

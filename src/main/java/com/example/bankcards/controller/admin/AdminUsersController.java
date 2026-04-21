@@ -1,9 +1,10 @@
 package com.example.bankcards.controller.admin;
 
-import com.example.bankcards.dto.admin.AdminUserRequest;
+import com.example.bankcards.dto.admin.AdminUserResponse;
 import com.example.bankcards.dto.admin.SetUserActiveRequest;
 import com.example.bankcards.dto.admin.SetUserRolesRequest;
 import com.example.bankcards.service.admin.user.AdminUserService;
+import com.example.bankcards.util.dto.PaginationRequest;
 import com.example.bankcards.util.dto.PaginationResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/admin/users")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUsersController {
@@ -26,23 +27,32 @@ public class AdminUsersController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginationResponse<AdminUserRequest>> list(Pageable pageable) {
-        return ResponseEntity.ok(service.list(pageable));
+    public ResponseEntity<PaginationResponse<AdminUserResponse>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        PaginationRequest pagination = new PaginationRequest(page, limit);
+
+        return ResponseEntity.ok(service.list(pagination));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<AdminUserRequest> get(@PathVariable UUID userId) {
+    public ResponseEntity<AdminUserResponse> get(@PathVariable UUID userId) {
         return ResponseEntity.ok(service.get(userId));
     }
 
     @PatchMapping("/{userId}/active")
-    public ResponseEntity<AdminUserRequest> setActive(@PathVariable UUID userId, @Valid @RequestBody SetUserActiveRequest req) {
-        return ResponseEntity.ok(service.setActive(userId, req.active()));
+    public ResponseEntity<Void> setActive(@PathVariable UUID userId, @Valid @RequestBody SetUserActiveRequest req) {
+        service.setActive(userId, req.active());
+
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{userId}/roles")
-    public ResponseEntity<AdminUserRequest> setRoles(@PathVariable UUID userId, @Valid @RequestBody SetUserRolesRequest req) {
-        return ResponseEntity.ok(service.setRoles(userId, req.roles()));
+    public ResponseEntity<Void> setRoles(@PathVariable UUID userId, @Valid @RequestBody SetUserRolesRequest req) {
+        service.setRoles(userId, req.roles());
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{userId}")
