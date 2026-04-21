@@ -17,3 +17,9 @@ databaseChangeLog:
   - include:
       file: db/migration/006-insert-default-roles.yml
       relativeToChangelogFile: false
+  - include:
+      file: db/migration/007-add-is-block-admin-to-user.yml
+      relativeToChangelogFile: false
+  - include:
+      file: db/migration/008-add-balance-check-constraint.yml
+      relativeToChangelogFile: false

@@ -22,6 +22,7 @@ spring:
     open-in-view: true
     show-sql: true
   liquibase:
+    enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.yml
 
 springdoc:
@@ -33,11 +34,19 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
 
+app:
+  jwt:
+    secret: 45c3febdc225272f1196fc57bc60cf3ef437604366c56105e307b7dc861f3e09
+    expiration: 86400000
+
 logging:
   level:
     org.hibernate.SQL: DEBUG  # Логирование SQL запросов
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Логирование параметров запросов
     org.hibernate.engine.jdbc.batch.internal: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.boot.web.servlet: DEBUG
 
 #security:
 #  admin:

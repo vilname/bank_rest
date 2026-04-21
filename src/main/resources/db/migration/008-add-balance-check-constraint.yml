@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-add-balance-check-constraint
+      author: developer
+      changes:
+        - sql:
+            comment: Add check constraint to ensure balance is not negative
+            sql: |
+              ALTER TABLE card 
+              ADD CONSTRAINT chk_card_balance_non_negative 
+              CHECK (balance >= 0)
+      rollback:
+        - sql:
+            sql: ALTER TABLE card DROP CONSTRAINT IF EXISTS chk_card_balance_non_negative

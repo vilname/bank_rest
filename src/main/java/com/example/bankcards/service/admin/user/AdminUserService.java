@@ -1,6 +1,6 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.admin.user;
 
-import com.example.bankcards.dto.admin.AdminUserDto;
+import com.example.bankcards.dto.admin.AdminUserRequest;
 import com.example.bankcards.entity.Role;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.BadRequestException;
@@ -27,29 +27,29 @@ public class AdminUserService {
         this.roleRepository = roles;
     }
 
-    public PaginationResponse<AdminUserDto> list(Pageable pageable) {
+    public PaginationResponse<AdminUserRequest> list(Pageable pageable) {
         List<User> users = userRepository.findAllWithPaginationAndRoles(pageable.getOffset(), pageable.getPageSize());
-        List<AdminUserDto> userDto = users.stream().map(AdminUserService::toDto).toList();
+        List<AdminUserRequest> userDto = users.stream().map(AdminUserService::toDto).toList();
 
-        int total = userRepository.countByIsActive(true);
+        int total = (int)userRepository.count();
 
         return new PaginationResponse<>(userDto, pageable, total);
     }
 
-    public AdminUserDto get(UUID userId) {
+    public AdminUserRequest get(UUID userId) {
         return userRepository.findById(userId).map(AdminUserService::toDto)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     @Transactional
-    public AdminUserDto setActive(UUID userId, boolean active) {
+    public AdminUserRequest setActive(UUID userId, boolean active) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         user.setActive(active);
         return toDto(user);
     }
 
     @Transactional
-    public AdminUserDto setRoles(UUID userId, Set<String> roleNames) {
+    public AdminUserRequest setRoles(UUID userId, Set<String> roleNames) {
         if (roleNames == null || roleNames.isEmpty()) {
             throw new BadRequestException("Roles must not be empty");
         }
@@ -73,9 +73,9 @@ public class AdminUserService {
         userRepository.deleteById(userId);
     }
 
-    private static AdminUserDto toDto(User u) {
+    private static AdminUserRequest toDto(User u) {
         Set<String> roles = u.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-        return new AdminUserDto(
+        return new AdminUserRequest(
                 u.getId(),
                 u.getEmail(),
                 u.getFirstName(),

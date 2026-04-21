@@ -1,6 +1,6 @@
-package com.example.bankcards.service;
+package com.example.bankcards.service.admin.card;
 
-import com.example.bankcards.dto.admin.AdminCardDto;
+import com.example.bankcards.dto.admin.AdminCardRequest;
 import com.example.bankcards.dto.admin.CreateCardRequest;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
@@ -29,22 +29,22 @@ public class AdminCardService {
         this.userRepository = users;
     }
 
-    public PaginationResponse<AdminCardDto> list(Pageable pageable) {
+    public PaginationResponse<AdminCardRequest> list(Pageable pageable) {
         List<Card> cards = cardRepository.findAllWithPaginationAndRoles(pageable.getOffset(), pageable.getPageSize());
-        List<AdminCardDto> cardDto = cards.stream().map(AdminCardService::toDto).toList();
+        List<AdminCardRequest> cardDto = cards.stream().map(AdminCardService::toDto).toList();
 
         int total = (int)cardRepository.count();
 
         return new PaginationResponse<>(cardDto, pageable, total);
     }
 
-    public AdminCardDto get(UUID cardId) {
+    public AdminCardRequest get(UUID cardId) {
         return cardRepository.findById(cardId).map(AdminCardService::toDto)
                 .orElseThrow(() -> new NotFoundException("Card not found"));
     }
 
     @Transactional
-    public AdminCardDto create(CreateCardRequest req) {
+    public AdminCardRequest create(CreateCardRequest req) {
         User user = userRepository.findById(req.userId()).orElseThrow(() -> new NotFoundException("User not found"));
 
         String normalizedNumber = req.number().replaceAll("\\s+", "");
@@ -71,14 +71,14 @@ public class AdminCardService {
     }
 
     @Transactional
-    public AdminCardDto block(UUID cardId) {
+    public AdminCardRequest block(UUID cardId) {
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new NotFoundException("Card not found"));
         card.setStatus(CardStatusEnum.BLOCKED);
         return toDto(card);
     }
 
     @Transactional
-    public AdminCardDto activate(UUID cardId) {
+    public AdminCardRequest activate(UUID cardId) {
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new NotFoundException("Card not found"));
         if (card.getExpiryDate() != null && card.getExpiryDate().isBefore(LocalDate.now())) {
             card.setStatus(CardStatusEnum.DEADLINE_EXPIRED);
@@ -96,8 +96,8 @@ public class AdminCardService {
         cardRepository.deleteById(cardId);
     }
 
-    private static AdminCardDto toDto(Card c) {
-        return new AdminCardDto(
+    private static AdminCardRequest toDto(Card c) {
+        return new AdminCardRequest(
                 c.getId(),
                 CardMaskerHelper.mask(c.getNumber()),
                 c.getOwner(),

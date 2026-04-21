@@ -1,9 +1,9 @@
 package com.example.bankcards.controller.admin;
 
-import com.example.bankcards.dto.admin.AdminUserDto;
+import com.example.bankcards.dto.admin.AdminUserRequest;
 import com.example.bankcards.dto.admin.SetUserActiveRequest;
 import com.example.bankcards.dto.admin.SetUserRolesRequest;
-import com.example.bankcards.service.AdminUserService;
+import com.example.bankcards.service.admin.user.AdminUserService;
 import com.example.bankcards.util.dto.PaginationResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -24,22 +24,22 @@ public class AdminUsersController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginationResponse<AdminUserDto>> list(Pageable pageable) {
+    public ResponseEntity<PaginationResponse<AdminUserRequest>> list(Pageable pageable) {
         return ResponseEntity.ok(service.list(pageable));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<AdminUserDto> get(@PathVariable UUID userId) {
+    public ResponseEntity<AdminUserRequest> get(@PathVariable UUID userId) {
         return ResponseEntity.ok(service.get(userId));
     }
 
     @PatchMapping("/{userId}/active")
-    public ResponseEntity<AdminUserDto> setActive(@PathVariable UUID userId, @Valid @RequestBody SetUserActiveRequest req) {
+    public ResponseEntity<AdminUserRequest> setActive(@PathVariable UUID userId, @Valid @RequestBody SetUserActiveRequest req) {
         return ResponseEntity.ok(service.setActive(userId, req.active()));
     }
 
     @PutMapping("/{userId}/roles")
-    public ResponseEntity<AdminUserDto> setRoles(@PathVariable UUID userId, @Valid @RequestBody SetUserRolesRequest req) {
+    public ResponseEntity<AdminUserRequest> setRoles(@PathVariable UUID userId, @Valid @RequestBody SetUserRolesRequest req) {
         return ResponseEntity.ok(service.setRoles(userId, req.roles()));
     }
 

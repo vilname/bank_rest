@@ -1,8 +1,8 @@
 package com.example.bankcards.controller.admin;
 
-import com.example.bankcards.dto.admin.AdminCardDto;
+import com.example.bankcards.dto.admin.AdminCardRequest;
 import com.example.bankcards.dto.admin.CreateCardRequest;
-import com.example.bankcards.service.AdminCardService;
+import com.example.bankcards.service.admin.card.AdminCardService;
 import com.example.bankcards.util.dto.PaginationResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -23,27 +23,27 @@ public class AdminCardsController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginationResponse<AdminCardDto>> list(Pageable pageable) {
+    public ResponseEntity<PaginationResponse<AdminCardRequest>> list(Pageable pageable) {
         return ResponseEntity.ok(service.list(pageable));
     }
 
     @GetMapping("/{cardId}")
-    public ResponseEntity<AdminCardDto> get(@PathVariable UUID cardId) {
+    public ResponseEntity<AdminCardRequest> get(@PathVariable UUID cardId) {
         return ResponseEntity.ok(service.get(cardId));
     }
 
     @PostMapping
-    public ResponseEntity<AdminCardDto> create(@Valid @RequestBody CreateCardRequest req) {
+    public ResponseEntity<AdminCardRequest> create(@Valid @RequestBody CreateCardRequest req) {
         return ResponseEntity.ok(service.create(req));
     }
 
     @PostMapping("/{cardId}/block")
-    public ResponseEntity<AdminCardDto> block(@PathVariable UUID cardId) {
+    public ResponseEntity<AdminCardRequest> block(@PathVariable UUID cardId) {
         return ResponseEntity.ok(service.block(cardId));
     }
 
     @PostMapping("/{cardId}/activate")
-    public ResponseEntity<AdminCardDto> activate(@PathVariable UUID cardId) {
+    public ResponseEntity<AdminCardRequest> activate(@PathVariable UUID cardId) {
         return ResponseEntity.ok(service.activate(cardId));
     }
 
