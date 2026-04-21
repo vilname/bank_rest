@@ -5,6 +5,7 @@ import com.example.bankcards.dto.admin.SetUserActiveRequest;
 import com.example.bankcards.dto.admin.SetUserRolesRequest;
 import com.example.bankcards.service.admin.user.AdminUserService;
 import com.example.bankcards.util.dto.PaginationResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin/users")
+@SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUsersController {
     private final AdminUserService service;

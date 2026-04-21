@@ -55,11 +55,11 @@ public class AdminUserService {
         }
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
-        Set<Role> newRoles = roleNames.stream()
+        List<Role> newRoles = roleNames.stream()
                 .map(String::trim)
                 .map(name -> name.startsWith("ROLE_") ? name : "ROLE_" + name)
                 .map(name -> roleRepository.findByName(name).orElseThrow(() -> new BadRequestException("Unknown role: " + name)))
-                .collect(Collectors.toSet());
+                .toList();
 
         user.setRoles(newRoles);
         return toDto(user);
