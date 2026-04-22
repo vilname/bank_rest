@@ -12,6 +12,7 @@ import java.util.UUID;
 @Repository
 public interface CardRepository extends JpaRepository<Card, UUID> {
     boolean existsByPanHmac(String panHmac);
+    int countByUserId(UUID userId);
 
     @Query(value = """
         select c.* from "card" c

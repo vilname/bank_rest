@@ -23,7 +23,7 @@ public class TransferController {
     private final TransferService transferService;
 
     @PostMapping
-    @Operation(summary = "Make a transfer between own cards")
+    @Operation(summary = "Перевести средства")
     public ResponseEntity<TransferResponse> makeTransfer(
             Authentication authentication,
             @Valid @RequestBody TransferRequest request) {
@@ -34,7 +34,7 @@ public class TransferController {
     }
 
     @GetMapping
-    @Operation(summary = "Get user transfers with pagination")
+    @Operation(summary = "Получить список переводов авторизованного пользователя")
     public ResponseEntity<PaginationResponse<TransferResponse>> getUserTransfers(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,

@@ -101,7 +101,7 @@ paths:
   /api/cards/block:
     post:
       tags: [Cards]
-      summary: Request card blocking
+      summary: Create block request
       operationId: blockCard
       security:
         - bearerAuth: []
@@ -113,7 +113,7 @@ paths:
               $ref: '#/components/schemas/BlockCardRequest'
       responses:
         '200':
-          description: Card blocked
+          description: Block request created
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -356,6 +356,94 @@ paths:
       responses:
         '200':
           description: Card activated
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/cards/block-requests:
+    get:
+      tags: [Admin Cards]
+      summary: List pending block requests (admin)
+      operationId: adminListPendingBlockRequests
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Pending block requests page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponseAdminCardBlockRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/cards/block-requests/{requestId}/approve:
+    post:
+      tags: [Admin Cards]
+      summary: Approve card block request (admin)
+      operationId: adminApproveBlockRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: requestId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Block request approved
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/cards/block-requests/{requestId}/reject:
+    post:
+      tags: [Admin Cards]
+      summary: Reject card block request (admin)
+      operationId: adminRejectBlockRequest
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: requestId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Block request rejected
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -746,6 +834,27 @@ components:
           type: string
           format: date-time
 
+    AdminCardBlockRequestResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        cardId:
+          type: string
+          format: uuid
+        maskedCardNumber:
+          type: string
+          example: '**** **** **** 5678'
+        userId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/CardBlockRequestStatusEnum'
+        created:
+          type: string
+          format: date-time
+
     SetUserActiveRequest:
       type: object
       required: [active]
@@ -841,9 +950,23 @@ components:
         pagination:
           $ref: '#/components/schemas/PaginationItem'
 
+    PaginationResponseAdminCardBlockRequest:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCardBlockRequestResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationItem'
+
     CardStatusEnum:
       type: string
       enum: [ACTIVE, BLOCKED, DEADLINE_EXPIRED]
+
+    CardBlockRequestStatusEnum:
+      type: string
+      enum: [PENDING, APPROVED, REJECTED]
 
     ApiError:
       type: object

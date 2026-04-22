@@ -4,11 +4,15 @@ import com.example.bankcards.dto.api.card.BalanceResponse;
 import com.example.bankcards.dto.api.card.CardListRequest;
 import com.example.bankcards.dto.api.card.CardResponse;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.CardBlockRequest;
 import com.example.bankcards.entity.User;
+import com.example.bankcards.exception.BadRequestException;
 import com.example.bankcards.exception.BusinessException;
+import com.example.bankcards.repository.CardBlockRequestRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.security.CardPanCodec;
 import com.example.bankcards.util.dto.PaginationResponse;
+import com.example.bankcards.util.enums.CardBlockRequestStatusEnum;
 import com.example.bankcards.util.enums.CardStatusEnum;
 import com.example.bankcards.util.helper.CardMaskerHelper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import java.util.UUID;
 public class CardService {
 
     private final CardRepository cardRepository;
+    private final CardBlockRequestRepository cardBlockRequestRepository;
     private final CardPanCodec cardPanCodec;
 
     @Transactional(readOnly = true)
@@ -44,7 +49,7 @@ public class CardService {
 
         List<CardResponse> cardList = cards.stream().map(this::toDto).toList();
 
-        int total = (int) cardRepository.count();
+        int total = cardRepository.countByUserId(authUser.getId());
 
         return new PaginationResponse<>(cardList, cardListRequest.getPagination(), total);
     }
@@ -66,11 +71,20 @@ public class CardService {
         Card card = getCardAndValidateOwnership(cardId, user);
 
         if (card.getStatus() == CardStatusEnum.BLOCKED) {
-            throw new BusinessException("Card is already blocked");
+            throw new BadRequestException("Card is already blocked");
         }
 
-        card.setStatus(CardStatusEnum.BLOCKED);
-        cardRepository.save(card);
+        if (cardBlockRequestRepository.existsByCardIdAndUserIdAndStatus(
+                card.getId(), user.getId(), CardBlockRequestStatusEnum.PENDING
+        )) {
+            throw new BadRequestException("Block request is already pending");
+        }
+
+        CardBlockRequest request = new CardBlockRequest();
+        request.setCard(card);
+        request.setUser(user);
+        request.setStatus(CardBlockRequestStatusEnum.PENDING);
+        cardBlockRequestRepository.save(request);
     }
 
     private Card getCardAndValidateOwnership(UUID cardId, User user) {

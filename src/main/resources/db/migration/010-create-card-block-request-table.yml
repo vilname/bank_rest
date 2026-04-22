@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-card-block-request-table
+      author: bank_rest
+      changes:
+        - createTable:
+            tableName: card_block_request
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: card_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created
+                  type: TIMESTAMP
+              - column:
+                  name: updated
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: card_block_request
+            baseColumnNames: card_id
+            referencedTableName: card
+            referencedColumnNames: id
+            constraintName: fk_card_block_request_card
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: card_block_request
+            baseColumnNames: user_id
+            referencedTableName: "user"
+            referencedColumnNames: id
+            constraintName: fk_card_block_request_user
+            onDelete: CASCADE
+        - createIndex:
+            tableName: card_block_request
+            indexName: idx_card_block_request_status
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            tableName: card_block_request
+            indexName: idx_card_block_request_created
+            columns:
+              - column:
+                  name: created
+        - sql:
+            dbms: postgresql
+            sql: >
+              create unique index if not exists uq_card_block_request_pending
+              on card_block_request(card_id, user_id)
+              where status = 'PENDING';

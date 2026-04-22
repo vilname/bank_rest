@@ -5,6 +5,7 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.BadRequestException;
 import com.example.bankcards.exception.NotFoundException;
+import com.example.bankcards.repository.CardBlockRequestRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.security.CardPanCodec;
@@ -27,6 +28,8 @@ class AdminCardServiceTest {
 
     @Mock
     private CardRepository cardRepository;
+    @Mock
+    private CardBlockRequestRepository cardBlockRequestRepository;
     @Mock
     private UserRepository userRepository;
     @Mock

@@ -6,6 +6,7 @@ import com.example.bankcards.dto.admin.SetUserRolesRequest;
 import com.example.bankcards.service.admin.user.AdminUserService;
 import com.example.bankcards.util.dto.PaginationRequest;
 import com.example.bankcards.util.dto.PaginationResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ public class AdminUsersController {
     }
 
     @GetMapping
+    @Operation(summary = "Список пользователей")
     public ResponseEntity<PaginationResponse<AdminUserResponse>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit
@@ -37,11 +39,13 @@ public class AdminUsersController {
     }
 
     @GetMapping("/{userId}")
+    @Operation(summary = "Детальная пользователя")
     public ResponseEntity<AdminUserResponse> get(@PathVariable UUID userId) {
         return ResponseEntity.ok(service.get(userId));
     }
 
     @PatchMapping("/{userId}/active")
+    @Operation(summary = "Активация пользователя")
     public ResponseEntity<Void> setActive(@PathVariable UUID userId, @Valid @RequestBody SetUserActiveRequest req) {
         service.setActive(userId, req.active());
 
@@ -49,6 +53,10 @@ public class AdminUsersController {
     }
 
     @PutMapping("/{userId}/roles")
+    @Operation(
+            summary = "Задать пользователю роль",
+            description = "Сейчам можно присвоить только роль админ, роль пользователь у всех пользователей по умолчанию"
+    )
     public ResponseEntity<Void> setRoles(@PathVariable UUID userId, @Valid @RequestBody SetUserRolesRequest req) {
         service.setRoles(userId, req.roles());
 
@@ -56,6 +64,7 @@ public class AdminUsersController {
     }
 
     @DeleteMapping("/{userId}")
+    @Operation(summary = "Удаление пользователя")
     public ResponseEntity<Void> delete(@PathVariable UUID userId) {
         service.delete(userId);
         return ResponseEntity.noContent().build();

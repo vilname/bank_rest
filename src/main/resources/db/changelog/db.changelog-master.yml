@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       file: db/migration/009-card-pan-encryption.yml
       relativeToChangelogFile: false
+  - include:
+      file: db/migration/010-create-card-block-request-table.yml
+      relativeToChangelogFile: false

@@ -3,9 +3,11 @@ package com.example.bankcards.service.api.card;
 import com.example.bankcards.dto.api.card.BalanceResponse;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
-import com.example.bankcards.exception.BusinessException;
+import com.example.bankcards.exception.BadRequestException;
+import com.example.bankcards.repository.CardBlockRequestRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.security.CardPanCodec;
+import com.example.bankcards.util.enums.CardBlockRequestStatusEnum;
 import com.example.bankcards.util.enums.CardStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +30,8 @@ class CardServiceTest {
 
     @Mock
     private CardRepository cardRepository;
-
+    @Mock
+    private CardBlockRequestRepository cardBlockRequestRepository;
     @Mock
     private CardPanCodec cardPanCodec;
 
@@ -60,7 +63,7 @@ class CardServiceTest {
     }
 
     @Test
-    void blockCardSavesWhenCardOwnedAndNotAlreadyBlocked() {
+    void blockCardCreatesPendingRequest() {
         User user = new User();
         user.setId(UUID.randomUUID());
 
@@ -70,14 +73,37 @@ class CardServiceTest {
         card.setStatus(CardStatusEnum.ACTIVE);
 
         when(cardRepository.findById(card.getId())).thenReturn(Optional.of(card));
+        when(cardBlockRequestRepository.existsByCardIdAndUserIdAndStatus(
+                card.getId(), user.getId(), CardBlockRequestStatusEnum.PENDING
+        )).thenReturn(false);
 
         cardService.blockCard(user, card.getId());
 
-        verify(cardRepository).save(card);
+        verify(cardBlockRequestRepository).save(any());
+        verify(cardRepository, never()).save(any());
     }
 
     @Test
-    void blockCardSkipsSaveWhenAlreadyBlocked() {
+    void blockCardThrowsWhenRequestAlreadyPending() {
+        User user = new User();
+        user.setId(UUID.randomUUID());
+
+        Card card = new Card();
+        card.setId(UUID.randomUUID());
+        card.setUser(user);
+        card.setStatus(CardStatusEnum.ACTIVE);
+
+        when(cardRepository.findById(card.getId())).thenReturn(Optional.of(card));
+        when(cardBlockRequestRepository.existsByCardIdAndUserIdAndStatus(
+                card.getId(), user.getId(), CardBlockRequestStatusEnum.PENDING
+        )).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> cardService.blockCard(user, card.getId()));
+        verify(cardBlockRequestRepository, never()).save(any());
+    }
+
+    @Test
+    void blockCardThrowsWhenAlreadyBlocked() {
         User user = new User();
         user.setId(UUID.randomUUID());
 
@@ -88,8 +114,8 @@ class CardServiceTest {
 
         when(cardRepository.findById(card.getId())).thenReturn(Optional.of(card));
 
-        assertThrows(BusinessException.class, () -> cardService.blockCard(user, card.getId()));
+        assertThrows(BadRequestException.class, () -> cardService.blockCard(user, card.getId()));
 
-        verify(cardRepository, never()).save(any());
+        verify(cardBlockRequestRepository, never()).save(any());
     }
 }

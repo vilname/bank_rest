@@ -27,7 +27,7 @@ public class CardController {
     private final CardService cardService;
 
     @GetMapping
-    @Operation(summary = "Get user cards with search and pagination")
+    @Operation(summary = "Список карт авторизованного пользователя")
     public ResponseEntity<PaginationResponse<CardResponse>> getUserCards(
             Authentication authentication,
             @RequestParam(required = false) String number,
@@ -36,13 +36,14 @@ public class CardController {
 
         PaginationRequest pagination = new PaginationRequest(page, limit);
         CardListRequest cardListRequest = new CardListRequest(number, pagination);
-        PaginationResponse<CardResponse> response = cardService.getUserCards(
-                (User) authentication.getPrincipal(), cardListRequest);
+        PaginationResponse<CardResponse> response
+                = cardService.getUserCards((User) authentication.getPrincipal(), cardListRequest);
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{cardId}/balance")
-    @Operation(summary = "Get card balance")
+    @Operation(summary = "Получить баланс по карте")
     public ResponseEntity<BalanceResponse> getCardBalance(
             Authentication authentication,
             @PathVariable UUID cardId) {
@@ -52,7 +53,7 @@ public class CardController {
     }
 
     @PostMapping("/block")
-    @Operation(summary = "Request card blocking")
+    @Operation(summary = "Создать заявку на блокировку карты")
     public ResponseEntity<Void> blockCard(
             Authentication authentication,
             @Valid @RequestBody BlockCardRequest request) {
