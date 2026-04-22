@@ -1,7 +1,6 @@
 package com.example.bankcards.util.helper;
 
 public final class CardMaskerHelper {
-    private CardMaskerHelper() {}
 
     public static String mask(String number) {
         if (number == null) return null;

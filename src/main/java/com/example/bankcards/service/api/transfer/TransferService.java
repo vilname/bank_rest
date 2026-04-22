@@ -9,6 +9,7 @@ import com.example.bankcards.exception.BusinessException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.TransferRepository;
 import com.example.bankcards.security.CardPanCodec;
+import com.example.bankcards.util.helper.CardHelper;
 import com.example.bankcards.util.helper.CardMaskerHelper;
 import com.example.bankcards.util.dto.PaginationRequest;
 import com.example.bankcards.util.dto.PaginationResponse;
@@ -45,6 +46,13 @@ public class TransferService {
         // если перевод на карту из которой средства снимаются
         if (fromCard.getId().equals(toCard.getId())) {
             throw new BusinessException("Cannot transfer to the same card");
+        }
+
+        if (CardHelper.markExpiredIfNeeded(fromCard)) {
+            cardRepository.save(fromCard);
+        }
+        if (CardHelper.markExpiredIfNeeded(toCard)) {
+            cardRepository.save(toCard);
         }
 
         // карта с которой списываются не активна

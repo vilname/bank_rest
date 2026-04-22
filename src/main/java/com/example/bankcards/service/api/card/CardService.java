@@ -14,11 +14,13 @@ import com.example.bankcards.security.CardPanCodec;
 import com.example.bankcards.util.dto.PaginationResponse;
 import com.example.bankcards.util.enums.CardBlockRequestStatusEnum;
 import com.example.bankcards.util.enums.CardStatusEnum;
+import com.example.bankcards.util.helper.CardHelper;
 import com.example.bankcards.util.helper.CardMaskerHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +32,7 @@ public class CardService {
     private final CardBlockRequestRepository cardBlockRequestRepository;
     private final CardPanCodec cardPanCodec;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PaginationResponse<CardResponse> getUserCards(User authUser, CardListRequest cardListRequest) {
 
         String rawFilter = cardListRequest.getNumber();
@@ -47,6 +49,16 @@ public class CardService {
                 cardListRequest.getPagination().getLimit()
             );
 
+        List<Card> updatedCards = new ArrayList<>();
+        for (Card card : cards) {
+            if (CardHelper.markExpiredIfNeeded(card)) {
+                updatedCards.add(card);
+            }
+        }
+        if (!updatedCards.isEmpty()) {
+            cardRepository.saveAll(updatedCards);
+        }
+
         List<CardResponse> cardList = cards.stream().map(this::toDto).toList();
 
         int total = cardRepository.countByUserId(authUser.getId());
@@ -54,9 +66,12 @@ public class CardService {
         return new PaginationResponse<>(cardList, cardListRequest.getPagination(), total);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BalanceResponse getCardBalance(User user, UUID cardId) {
         Card card = getCardAndValidateOwnership(cardId, user);
+        if (CardHelper.markExpiredIfNeeded(card)) {
+            cardRepository.save(card);
+        }
 
         return BalanceResponse.builder()
                 .cardId(card.getId())
@@ -69,6 +84,10 @@ public class CardService {
     @Transactional
     public void blockCard(User user, UUID cardId) {
         Card card = getCardAndValidateOwnership(cardId, user);
+        if (CardHelper.markExpiredIfNeeded(card)) {
+            cardRepository.save(card);
+            throw new BadRequestException("Card is expired");
+        }
 
         if (card.getStatus() == CardStatusEnum.BLOCKED) {
             throw new BadRequestException("Card is already blocked");

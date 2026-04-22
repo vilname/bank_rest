@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-drop-is-block-admin
+      author: bank_rest
+      changes:
+        - dropColumn:
+            tableName: user
+            columnName: is_block_admin

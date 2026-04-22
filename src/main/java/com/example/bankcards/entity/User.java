@@ -51,9 +51,6 @@ public class User implements UserDetails {
     @Column(name = "is_active")
     private boolean isActive = true;
 
-    @Column(name = "is_block_admin")
-    private boolean isBlockAdmin = false;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Card> cards = new ArrayList<>();
 
@@ -87,7 +84,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !this.isBlockAdmin;
+        return true;
     }
 
     @Override
