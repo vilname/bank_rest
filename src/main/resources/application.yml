@@ -38,6 +38,9 @@ app:
   jwt:
     secret: 45c3febdc225272f1196fc57bc60cf3ef437604366c56105e307b7dc861f3e09
     expiration: 86400000
+  pan:
+    # 64 hex chars = 32 bytes; override in production via APP_PAN_SECRET
+    secret: ${APP_PAN_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
 
 logging:
   level:

@@ -97,27 +97,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-    post:
-      tags: [Cards]
-      summary: Create card for authenticated user
-      operationId: createCard
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CardRequest'
-      responses:
-        '200':
-          description: Card created
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
 
   /api/cards/block:
     post:
@@ -163,58 +142,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /api/cards/{cardId}:
-    put:
-      tags: [Cards]
-      summary: Update card
-      operationId: updateCard
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: cardId
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CardRequest'
-      responses:
-        '200':
-          description: Card updated
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags: [Cards]
-      summary: Delete card
-      operationId: deleteCard
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: cardId
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Card deleted
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -679,22 +606,6 @@ components:
           items:
             type: string
           example: [ROLE_USER]
-
-    CardRequest:
-      type: object
-      required: [number, balance, owner]
-      properties:
-        number:
-          type: string
-          pattern: '^\d{16}$'
-          example: '1234567812345678'
-        balance:
-          type: integer
-          minimum: 0
-          example: 1000
-        owner:
-          type: string
-          example: Ivan Ivanov
 
     BlockCardRequest:
       type: object

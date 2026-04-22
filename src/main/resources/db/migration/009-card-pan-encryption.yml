@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-card-pan-encryption
+      author: bank_rest
+      changes:
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE card DROP CONSTRAINT IF EXISTS card_number_key;
+        - dropColumn:
+            tableName: card
+            columnName: number
+        - addColumn:
+            tableName: card
+            columns:
+              - column:
+                  name: pan_cipher
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: pan_hmac
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: pan_last_four
+                  type: VARCHAR(4)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: card
+            columnNames: pan_hmac
+            constraintName: uq_card_pan_hmac

@@ -1,6 +1,9 @@
 package com.example.bankcards.controller.api;
 
-import com.example.bankcards.dto.api.card.*;
+import com.example.bankcards.dto.api.card.BalanceResponse;
+import com.example.bankcards.dto.api.card.BlockCardRequest;
+import com.example.bankcards.dto.api.card.CardListRequest;
+import com.example.bankcards.dto.api.card.CardResponse;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.service.api.card.CardService;
 import com.example.bankcards.util.dto.PaginationRequest;
@@ -18,7 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/cards")
 @RequiredArgsConstructor
-@Tag(name = "Card", description = "Карты пользователей")
+@Tag(name = "Card", description = "Просмотр карт, баланс и заявка на блокировку (роль USER)")
 public class CardController {
 
     private final CardService cardService;
@@ -44,41 +47,8 @@ public class CardController {
             Authentication authentication,
             @PathVariable UUID cardId) {
 
-        BalanceResponse response = cardService.getCardBalance((User)authentication.getPrincipal(), cardId);
+        BalanceResponse response = cardService.getCardBalance((User) authentication.getPrincipal(), cardId);
         return ResponseEntity.ok(response);
-    }
-
-    @PostMapping
-    @Operation(summary = "Create a new card")
-    public ResponseEntity<Void> createCard(
-            Authentication authentication,
-            @Valid @RequestBody CardRequest request) {
-
-        cardService.createCard((User)authentication.getPrincipal(), request);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/{cardId}")
-    @Operation(summary = "Update an existing card")
-    public ResponseEntity<Void> updateCard(
-            Authentication authentication,
-            @PathVariable UUID cardId,
-            @Valid @RequestBody CardRequest request) {
-
-        cardService.updateCard((User)authentication.getPrincipal(), cardId, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{cardId}")
-    @Operation(summary = "Delete a card")
-    public ResponseEntity<Void> deleteCard(
-            Authentication authentication,
-            @PathVariable UUID cardId) {
-
-        cardService.deleteCard((User)authentication.getPrincipal(), cardId);
-
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/block")
@@ -87,7 +57,7 @@ public class CardController {
             Authentication authentication,
             @Valid @RequestBody BlockCardRequest request) {
 
-        cardService.blockCard((User)authentication.getPrincipal(), request.getCardId());
+        cardService.blockCard((User) authentication.getPrincipal(), request.getCardId());
 
         return ResponseEntity.ok().build();
     }

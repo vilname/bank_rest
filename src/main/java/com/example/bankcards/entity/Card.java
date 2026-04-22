@@ -26,8 +26,14 @@ public class Card {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(nullable = false)
-    private String number;
+    @Column(name = "pan_cipher", nullable = false, columnDefinition = "TEXT")
+    private String panCipher;
+
+    @Column(name = "pan_hmac", nullable = false, length = 64, unique = true)
+    private String panHmac;
+
+    @Column(name = "pan_last_four", nullable = false, length = 4)
+    private String panLastFour;
 
     @Column(nullable = false)
     private Integer balance;

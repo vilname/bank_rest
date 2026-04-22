@@ -7,6 +7,7 @@ import com.example.bankcards.exception.BadRequestException;
 import com.example.bankcards.exception.NotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.CardPanCodec;
 import com.example.bankcards.util.enums.CardStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,8 @@ class AdminCardServiceTest {
     private CardRepository cardRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private CardPanCodec cardPanCodec;
 
     @InjectMocks
     private AdminCardService adminCardService;
@@ -42,6 +45,7 @@ class AdminCardServiceTest {
                 100
         );
         when(userRepository.findById(request.userId())).thenReturn(Optional.of(new User()));
+        when(cardPanCodec.normalize("12AB")).thenReturn("12");
 
         BadRequestException ex = assertThrows(BadRequestException.class, () -> adminCardService.create(request));
 

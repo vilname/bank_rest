@@ -8,11 +8,12 @@ import com.example.bankcards.exception.BadRequestException;
 import com.example.bankcards.exception.NotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.CardPanCodec;
 import com.example.bankcards.util.dto.PaginationRequest;
 import com.example.bankcards.util.dto.PaginationResponse;
-import com.example.bankcards.util.helper.CardMaskerHelper;
 import com.example.bankcards.util.enums.CardStatusEnum;
-import org.springframework.data.domain.Pageable;
+import com.example.bankcards.util.helper.CardMaskerHelper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,26 +22,23 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AdminCardService {
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
-
-    public AdminCardService(CardRepository cards, UserRepository users) {
-        this.cardRepository = cards;
-        this.userRepository = users;
-    }
+    private final CardPanCodec cardPanCodec;
 
     public PaginationResponse<AdminCardResponse> list(PaginationRequest pagination) {
-        List<Card> cards = cardRepository.findAllByPagination(pagination.getPage(), pagination.getLimit());
-        List<AdminCardResponse> cardDto = cards.stream().map(AdminCardService::toDto).toList();
+        List<Card> cards = cardRepository.findAllByPagination(pagination.getOffset(), pagination.getLimit());
+        List<AdminCardResponse> cardDto = cards.stream().map(this::toDto).toList();
 
-        int total = (int)cardRepository.count();
+        int total = (int) cardRepository.count();
 
         return new PaginationResponse<>(cardDto, pagination, total);
     }
 
     public AdminCardResponse get(UUID cardId) {
-        return cardRepository.findById(cardId).map(AdminCardService::toDto)
+        return cardRepository.findById(cardId).map(this::toDto)
                 .orElseThrow(() -> new NotFoundException("Card not found"));
     }
 
@@ -48,11 +46,11 @@ public class AdminCardService {
     public void create(CreateCardRequest req) {
         User user = userRepository.findById(req.userId()).orElseThrow(() -> new NotFoundException("User not found"));
 
-        String normalizedNumber = req.number().replaceAll("\\s+", "");
+        String normalizedNumber = cardPanCodec.normalize(req.number());
         if (!normalizedNumber.matches("\\d{12,19}")) {
             throw new BadRequestException("Card number must contain 12-19 digits");
         }
-        if (cardRepository.existsByNumber(normalizedNumber)) {
+        if (cardPanCodec.plainPanExists(normalizedNumber)) {
             throw new BadRequestException("Card number already exists");
         }
         if (req.expiryDate().isBefore(LocalDate.now())) {
@@ -61,7 +59,7 @@ public class AdminCardService {
 
         Card card = new Card();
         card.setUser(user);
-        card.setNumber(normalizedNumber);
+        cardPanCodec.writeEncryptedPan(card, normalizedNumber);
         card.setOwner(req.owner());
         card.setExpiryDate(req.expiryDate());
         card.setBalance(req.balance());
@@ -96,10 +94,10 @@ public class AdminCardService {
         cardRepository.deleteById(cardId);
     }
 
-    private static AdminCardResponse toDto(Card c) {
+    private AdminCardResponse toDto(Card c) {
         return new AdminCardResponse(
                 c.getId(),
-                CardMaskerHelper.mask(c.getNumber()),
+                CardMaskerHelper.mask(cardPanCodec.readPlainPan(c)),
                 c.getOwner(),
                 c.getExpiryDate(),
                 c.getStatus(),
@@ -110,4 +108,3 @@ public class AdminCardService {
         );
     }
 }
-

@@ -8,7 +8,7 @@ import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.BusinessException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.TransferRepository;
-import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.CardPanCodec;
 import com.example.bankcards.util.enums.CardStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ class TransferServiceTest {
     @Mock
     private CardRepository cardRepository;
     @Mock
-    private UserRepository userRepository;
+    private CardPanCodec cardPanCodec;
 
     @InjectMocks
     private TransferService transferService;
@@ -44,14 +44,12 @@ class TransferServiceTest {
 
         Card fromCard = new Card();
         fromCard.setId(UUID.randomUUID());
-        fromCard.setNumber("1111222233334444");
         fromCard.setBalance(1000);
         fromCard.setStatus(CardStatusEnum.ACTIVE);
         fromCard.setUser(user);
 
         Card toCard = new Card();
         toCard.setId(UUID.randomUUID());
-        toCard.setNumber("5555666677778888");
         toCard.setBalance(200);
         toCard.setStatus(CardStatusEnum.ACTIVE);
         toCard.setUser(user);
@@ -68,6 +66,8 @@ class TransferServiceTest {
         when(cardRepository.findById(fromCard.getId())).thenReturn(Optional.of(fromCard));
         when(cardRepository.findById(toCard.getId())).thenReturn(Optional.of(toCard));
         when(transferRepository.save(any(Transfer.class))).thenReturn(transfer);
+        when(cardPanCodec.readPlainPan(fromCard)).thenReturn("1111222233334444");
+        when(cardPanCodec.readPlainPan(toCard)).thenReturn("5555666677778888");
 
         TransferResponse response = transferService.makeTransfer(user, request);
 
@@ -84,7 +84,6 @@ class TransferServiceTest {
 
         Card card = new Card();
         card.setId(UUID.randomUUID());
-        card.setNumber("1111222233334444");
         card.setBalance(1000);
         card.setStatus(CardStatusEnum.ACTIVE);
         card.setUser(user);
@@ -108,14 +107,12 @@ class TransferServiceTest {
 
         Card fromCard = new Card();
         fromCard.setId(UUID.randomUUID());
-        fromCard.setNumber("1111222233334444");
         fromCard.setBalance(100);
         fromCard.setStatus(CardStatusEnum.ACTIVE);
         fromCard.setUser(user);
 
         Card toCard = new Card();
         toCard.setId(UUID.randomUUID());
-        toCard.setNumber("5555666677778888");
         toCard.setBalance(200);
         toCard.setStatus(CardStatusEnum.ACTIVE);
         toCard.setUser(user);

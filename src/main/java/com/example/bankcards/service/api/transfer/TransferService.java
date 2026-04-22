@@ -8,7 +8,8 @@ import com.example.bankcards.entity.User;
 import com.example.bankcards.exception.BusinessException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.TransferRepository;
-import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.CardPanCodec;
+import com.example.bankcards.util.helper.CardMaskerHelper;
 import com.example.bankcards.util.dto.PaginationRequest;
 import com.example.bankcards.util.dto.PaginationResponse;
 import com.example.bankcards.util.enums.CardStatusEnum;
@@ -24,7 +25,7 @@ public class TransferService {
 
     private final TransferRepository transferRepository;
     private final CardRepository cardRepository;
-    private final UserRepository userRepository;
+    private final CardPanCodec cardPanCodec;
 
     @Transactional
     public TransferResponse makeTransfer(User user, TransferRequest request) {
@@ -101,13 +102,13 @@ public class TransferService {
         TransferResponse.CardResponse fromCardInfo = TransferResponse.CardResponse.builder()
                 .id(fromCard.getId())
                 .balance(fromCard.getBalance())
-                .number(maskCardNumber(fromCard.getNumber())) // опционально
+                .number(CardMaskerHelper.mask(cardPanCodec.readPlainPan(fromCard)))
                 .build();
 
         TransferResponse.CardResponse toCardInfo = TransferResponse.CardResponse.builder()
                 .id(toCard.getId())
                 .balance(toCard.getBalance())
-                .number(maskCardNumber(toCard.getNumber())) // опционально
+                .number(CardMaskerHelper.mask(cardPanCodec.readPlainPan(toCard)))
                 .build();
 
         return TransferResponse.builder()
@@ -115,16 +116,9 @@ public class TransferService {
                 .balance(transfer.getBalance())
                 .created(transfer.getCreated())
                 .fromCard(fromCardInfo)
-                .fromCardNumber(maskCardNumber(fromCard.getNumber()))
+                .fromCardNumber(CardMaskerHelper.mask(cardPanCodec.readPlainPan(fromCard)))
                 .toCard(toCardInfo)
-                .toCardNumber(maskCardNumber(toCard.getNumber()))
+                .toCardNumber(CardMaskerHelper.mask(cardPanCodec.readPlainPan(toCard)))
                 .build();
-    }
-
-    private String maskCardNumber(String cardNumber) {
-        if (cardNumber == null || cardNumber.length() < 16) {
-            return cardNumber;
-        }
-        return "**** **** **** " + cardNumber.substring(12);
     }
 }
