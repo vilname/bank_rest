@@ -36,11 +36,15 @@ springdoc:
 
 app:
   jwt:
-    secret: 45c3febdc225272f1196fc57bc60cf3ef437604366c56105e307b7dc861f3e09
+    # Required from environment; do not commit real secret to repository
+    secret: ${APP_JWT_SECRET}
     expiration: 86400000
   pan:
     # 64 hex chars = 32 bytes; override in production via APP_PAN_SECRET
     secret: ${APP_PAN_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+  cors:
+    # Comma-separated list, e.g. http://localhost:3000,http://localhost:5173
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
 
 logging:
   level:
@@ -50,9 +54,4 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.springframework.boot.web.servlet: DEBUG
-
-#security:
-#  admin:
-#    username: ${ADMIN_USERNAME:admin}
-#    password: ${ADMIN_PASSWORD:admin123}
 
